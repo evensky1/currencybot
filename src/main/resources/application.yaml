@@ -1,0 +1,27 @@
+app:
+  constraints:
+    userCount: 100
+    pollDelay: 10000
+bot:
+  name: ev_currency_bot
+  token: 6696144551:AAGyehVoxZLQznA-1TZKLZXuvU3KjQPm89I
+mexc:
+  api:
+    uri: https://api.mexc.com/api/v3/ticker/price
+server:
+  port: 8085
+spring:
+  application:
+    name: tg-currency-bot
+  datasource:
+    username: 'postgres'
+    password: 'abc123'
+    url: jdbc:postgresql://localhost:5432/tg_currency_db
+  jpa:
+    show-sql: 'true'
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
