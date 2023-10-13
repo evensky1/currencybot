@@ -4,7 +4,7 @@ app:
     pollDelay: 10000
 bot:
   name: ev_currency_bot
-  token: 6696144551:AAGyehVoxZLQznA-1TZKLZXuvU3KjQPm89I
+  token: ${TG_BOT_TOKEN}
 mexc:
   api:
     uri: https://api.mexc.com/api/v3/ticker/price

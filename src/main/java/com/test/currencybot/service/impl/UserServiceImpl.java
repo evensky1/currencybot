@@ -32,6 +32,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void disenrollUser(Long chatId) {
+        userRepository.deleteById(chatId);
+    }
+
+    @Override
     public List<User> findAll() {
         return userRepository.findAll();
     }

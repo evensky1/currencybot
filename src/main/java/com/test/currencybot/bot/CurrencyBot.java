@@ -1,6 +1,7 @@
 package com.test.currencybot.bot;
 
-import com.test.currencybot.exceptions.UserCountLimitException;
+import com.test.currencybot.bot.commands.BotCommand;
+import com.test.currencybot.bot.commands.impl.DefaultCommand;
 import com.test.currencybot.service.CurrencyService;
 import com.test.currencybot.service.UserService;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,6 +26,7 @@ public class CurrencyBot extends TelegramLongPollingBot {
 
     private final CurrencyService currencyService;
     private final UserService userService;
+    private final Map<String, BotCommand> botCommands;
 
     @Value("${bot.name}")
     private final String botUsername;
@@ -38,11 +41,9 @@ public class CurrencyBot extends TelegramLongPollingBot {
             var messageText = update.getMessage().getText();
             var chatId = update.getMessage().getChatId();
 
-            if (messageText.equals("/start")) {
-                startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-            } else {
-                sendMessage(chatId, "Don't call us, we'll call you.");
-            }
+            var answer = botCommands.getOrDefault(messageText, new DefaultCommand()).process(update);
+
+            sendMessage(chatId, answer);
         }
     }
 
@@ -51,25 +52,13 @@ public class CurrencyBot extends TelegramLongPollingBot {
 
         currencyService.getChangedRates().subscribe(rates -> {
             var message = rates.stream()
-                    .map(rate -> String.format("Name: %s, percent: %s", rate.name(), rate.percent()))
+                    .sorted()
+                    .limit(20)
+                    .map(rate -> String.format("Name: %s, percent: %.2f%%", rate.name(), rate.percent()))
                     .collect(Collectors.joining("\n"));
 
             notifyAllUsers(message);
         });
-    }
-
-    private void startCommandReceived(Long chatId, String name) {
-        String answer;
-
-        try {
-            userService.enrollNewUser(chatId, name);
-            answer = String.format("Hi, %s, you've been successfully registered", name);
-        } catch (UserCountLimitException e) {
-            log.error(e.getMessage());
-            answer = String.format("Hi, %s, sorry, but now we unable to register you", name);
-        }
-
-        sendMessage(chatId, answer);
     }
 
     private void notifyAllUsers(String textToSend) {

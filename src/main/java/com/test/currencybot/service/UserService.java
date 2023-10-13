@@ -7,5 +7,6 @@ import java.util.List;
 public interface UserService {
 
     void enrollNewUser(Long chatId, String username);
+    void disenrollUser(Long chatId);
     List<User> findAll();
 }
