@@ -15,7 +15,7 @@ spring:
     name: tg-currency-bot
   datasource:
     username: 'postgres'
-    password: 'abc123'
+    password: 'postgres'
     url: jdbc:postgresql://localhost:5432/tg_currency_db
   jpa:
     show-sql: 'true'

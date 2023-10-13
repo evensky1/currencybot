@@ -1,10 +1,10 @@
 package com.test.currencybot.bot;
 
-import com.test.currencybot.config.BotConfig;
 import com.test.currencybot.exceptions.UserCountLimitException;
 import com.test.currencybot.service.CurrencyService;
 import com.test.currencybot.service.UserService;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,28 +17,24 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Getter
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CurrencyBot extends TelegramLongPollingBot {
 
-    private final BotConfig botConfig;
     private final CurrencyService currencyService;
     private final UserService userService;
 
-    @Override
-    public String getBotUsername() {
-        return botConfig.getBotName();
-    }
+    @Value("${bot.name}")
+    private final String botUsername;
 
-    @Override
-    public String getBotToken() {
-        return botConfig.getToken();
-    }
+    @Value("${bot.token}")
+    private final String botToken;
 
     @Override
     public void onUpdateReceived(Update update) {
 
-        if(update.hasMessage() && update.getMessage().hasText()){
+        if (update.hasMessage() && update.getMessage().hasText()) {
             var messageText = update.getMessage().getText();
             var chatId = update.getMessage().getChatId();
 

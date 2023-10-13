@@ -3,8 +3,7 @@ package com.test.currencybot.service.impl;
 import com.test.currencybot.model.ChangedRate;
 import com.test.currencybot.model.CurrencyInfo;
 import com.test.currencybot.service.CurrencyService;
-import lombok.AllArgsConstructor;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -19,10 +18,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CurrencyServiceImpl implements CurrencyService {
 
     private final WebClient webClient;
+
+    @Value("${mexc.api.uri}")
+    private final String mexcUri;
 
     private Map<String, Double> prevMexcRates;
 
@@ -39,7 +41,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     private Mono<Map<String, Double>> getCurrentMexcRates() {
         return webClient
                 .get()
-                .uri("https://api.mexc.com/api/v3/ticker/price")
+                .uri(mexcUri)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CurrencyInfo>>() {})
                 .map(rates -> rates.stream().collect(
@@ -50,16 +52,17 @@ public class CurrencyServiceImpl implements CurrencyService {
     private List<ChangedRate> provideChangedRateList(Map<String, Double> currentRates) {
         var changedRates = new LinkedList<ChangedRate>();
 
-       currentRates.forEach((key, price) -> {
-           var prevPrice = prevMexcRates.get(key);
+        currentRates.forEach((key, price) -> {
+            var prevPrice = prevMexcRates.get(key);
 
-           if (!prevPrice.equals(price)) {
-               var changedRate = new ChangedRate(key, prevPrice, price, prevPrice / price);
-               changedRates.add(changedRate);
-           }
-       });
+            if (!prevPrice.equals(price)) {
+                var percent = (1 - prevPrice / price) * 100;
+                var changedRate = new ChangedRate(key, prevPrice, price, percent);
+                changedRates.add(changedRate);
+            }
+        });
 
-       prevMexcRates = currentRates;
-       return changedRates;
+        prevMexcRates = currentRates;
+        return changedRates;
     }
 }

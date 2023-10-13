@@ -5,13 +5,13 @@ import com.test.currencybot.exceptions.UserCountLimitException;
 import com.test.currencybot.model.User;
 import com.test.currencybot.repository.UserRepository;
 import com.test.currencybot.service.UserService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final Constraints constraints;
